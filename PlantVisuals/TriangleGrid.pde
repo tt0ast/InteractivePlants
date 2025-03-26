@@ -1,4 +1,5 @@
 class TriangleGrid {
+  
   color[][] triArray;
   int numRows;
   int numCols;
@@ -8,25 +9,30 @@ class TriangleGrid {
   boolean color2On;
   
   TriangleGrid(int columns) {
+    
     numCols = columns * 2;
-    triSizeX = width / (numCols / 2);
+    triSizeX = width / (numCols / 2.0);
+    numCols++; // because we have a empty col a the beginning, we need to draw one extra col
     triSizeY = (sqrt(3) / 2) * triSizeX;
-    numRows = round(height / triSizeY);
+    numRows = ceil(height / triSizeY);
+    
     triArray = new color[numCols][numRows];
     for (int x = 0; x < numCols; x++){
       for (int y = 0; y < numRows; y++){
         triArray[x][y] = color(100,100,100);
       } 
     }
+    
     strokeWeight(2.0);
     color1On = false;
-    color2On = false;
+    color2On = false; 
   }
   
   void drawGrid() {
     
     float scaleFacP = 1.0;
     float scaleFacM = 1 - (scaleFacP - 1);
+    float triSizeXHalf = (triSizeX / 2);
     
     color[][] nextTriArray = new color[numCols][numRows];
     
@@ -37,17 +43,18 @@ class TriangleGrid {
       addColorBlob(2, 10, 70, 100);
     }
     
+    pushMatrix();
+    translate(-triSizeXHalf, 0);
+    
     for (int y = 0; y < numRows; y++) {
       for (int x = 0 ; x < numCols; x++) {
-        float alpha = (noise(x / 25.0, y / 12.5, millis() / 7500.0) * 70) + 30;  
-        nextTriArray[x][y] = getHoodColor(x,y); 
-        
+        float alpha = (noise(x / 25.0, y / 12.5, millis() / 7500.0) * 70) + 30; 
+        nextTriArray[x][y] = getHoodColor(x,y);     
         color newColor = color(hue(nextTriArray[x][y]), saturation(nextTriArray[x][y]), alpha);
     
         stroke(newColor);
         fill(newColor);
- 
-        float triSizeXHalf = (triSizeX / 2);
+
             if (x % 2 == y % 2) {
               triangle(x * triSizeXHalf, y * triSizeY,
                        (x + 1) * triSizeXHalf, (y + 1) * triSizeY,
@@ -60,6 +67,9 @@ class TriangleGrid {
             }
         } 
      }
+     
+     popMatrix();
+     
      triArray = nextTriArray;
      
    }
@@ -79,7 +89,7 @@ class TriangleGrid {
        }     
      }
    }
-     
+   
    color getHoodColor(int x, int y) {
      
      color color1 = triArray[mod(x - 1, numCols)][y];
@@ -93,6 +103,7 @@ class TriangleGrid {
      return color(hue, saturation, 100);
    }
    
+   // java mod returns < 0 values for < 0 inputs, this is a fix for that
    int mod(int a, int b) {
      int remainder = a % b;
      if (remainder < 0) {
